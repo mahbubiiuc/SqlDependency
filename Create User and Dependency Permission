@@ -45,3 +45,11 @@ GP
 --grant permissions on user objects used by application
 GRANT SELECT ON dbo.Services TO adm;
 GO
+
+
+INSERT INTO dbo.Services VALUES('SomeService1', 2.00);
+GO
+UPDATE dbo.Services SET ServicePrice = 2.5 WHERE ServiceName = 'SomeService1';
+GO
+DELETE FROM dbo.Services WHERE ServiceName = 'SomeService';
+GO
