@@ -1,0 +1,47 @@
+USE master;
+GO
+CREATE DATABASE Production;
+GO
+ALTER DATABASE Production SET ENABLE_BROKER;
+
+GO
+--create user for schema ownership
+CREATE USER SqlDependencySchemaOwner WITHOUT LOGIN;
+GO
+--create schema for SqlDependency objects
+CREATE SCHEMA SqlDependency AUTHORIZATION SqlDependencySchemaOwner;
+GO
+
+--add existing login as a minimally privileged database user with default schema SqlDependency
+CREATE USER adm WITH DEFAULT_SCHEMA = SqlDependency;
+
+--grant user control permissions on SqlDependency schema
+GRANT CONTROL ON SCHEMA::SqlDependency TO adm;
+
+--grant user impersonate permissions on SqlDependency schema owner
+GRANT IMPERSONATE ON USER::SqlDependencySchemaOwner TO adm;
+GO
+
+--grant database permissions needed to create and use SqlDependency objects
+GRANT CREATE PROCEDURE TO adm;
+GRANT CREATE QUEUE TO adm;
+GRANT CREATE SERVICE TO adm;
+GRANT REFERENCES ON
+    CONTRACT::[http://schemas.microsoft.com/SQL/Notifications/PostQueryNotification] TO adm;
+GRANT VIEW DEFINITION TO adm;
+GRANT SELECT to adm;
+GRANT SUBSCRIBE QUERY NOTIFICATIONS TO adm;
+GRANT RECEIVE ON QueryNotificationErrorsQueue TO adm;
+GO
+
+USE Production;
+GO
+CREATE TABLE dbo.Services(
+      ServiceName varchar(100) NOT NULL 
+        CONSTRAINT PK_Services PRIMARY KEY
+    , ServicePrice decimal(10,2) NOT NULL
+);
+GP
+--grant permissions on user objects used by application
+GRANT SELECT ON dbo.Services TO adm;
+GO
