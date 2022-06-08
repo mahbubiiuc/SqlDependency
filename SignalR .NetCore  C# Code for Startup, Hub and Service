@@ -1,0 +1,159 @@
+/** Startup class **/
+public void ConfigureServices(IServiceCollection services) 
+{
+   ...
+   //services.AddSignalR();
+   services.AddSignalR(hubOptions => {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+            }).AddJsonProtocol(options => {
+                options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            });
+}
+
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+   ...
+   app.UseEndpoints(endpoints =>
+   {
+      ...       
+      endpoints.MapHub<MkistatHub>("/MkistatHub");
+   });
+   ...
+}
+
+
+/** Hub **/
+public class MkistatHub : Hub
+{
+    private static Dictionary<string, int> onlineClientCounts = new Dictionary<string, int>();
+
+    public override Task OnConnectedAsync()
+    { 
+        var IdentityName = Context.User.Identity.Name;
+        Groups.AddToGroupAsync(Context.ConnectionId, IdentityName);
+
+        int count = 0;
+        if (onlineClientCounts.TryGetValue(IdentityName, out count))
+            onlineClientCounts[IdentityName] = count + 1;//increment client number
+        else
+            onlineClientCounts.Add(IdentityName, 1);// add group and set its client number to 1
+
+
+        return base.OnConnectedAsync();
+    }
+    
+    public override async Task OnDisconnectedAsync(Exception exception)
+    {
+        var IdentityName = Context.User.Identity.Name;
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, IdentityName);
+
+        int count = 0;
+        if (onlineClientCounts.TryGetValue(IdentityName, out count))
+        {
+            if (count == 1)//if group contains only 1client
+                onlineClientCounts.Remove(IdentityName);
+            else
+                onlineClientCounts[IdentityName] = count - 1;
+        } 
+
+        await base.OnDisconnectedAsync(exception);
+    }
+    
+    public async Task Join(string errMsg)
+    {
+    
+    }
+    public async Task SendMessage(string user, string message)
+    { 
+        
+        await Clients.All.SendAsync("ReceiveMessage", user, message);
+    }
+
+    public async Task SendMessageToGroup(string sender, string groupname, string message)
+    { 
+        //check if group contains clients or not via the global variable or check database.
+
+        await Clients.Group(groupname).SendAsync("ReceiveMessage", sender, message);
+    }   
+}
+
+
+/** Service Method **/
+public class MkistatService
+{
+     private bool DoesUserHavePermission()
+     {
+         try
+         {
+             SqlClientPermission clientPermission = new SqlClientPermission(PermissionState.Unrestricted);
+             clientPermission.Demand();
+             return true;
+         }
+         catch
+         {
+             return false;
+         }
+     }
+     
+     public bool Connect()
+     {
+         if (DoesUserHavePermission())
+         {
+             var res = SqlDependency.Stop(_ConnectionString, _QueueName);
+             return SqlDependency.Start(_ConnectionString, _QueueName);
+         }
+         return false;
+     }
+      
+     void SomeMethod()
+     {
+           using (SqlConnection connection = new SqlConnection(_ConnectionString))
+           {
+               if (connection.State == ConnectionState.Closed) connection.Open();
+
+                // Create a new SqlCommand object.
+                using (SqlCommand command = new SqlCommand("select ServiceName, ServicePrice from dbo.Services",connection))
+                {
+                    command.Notification = null;
+
+                    // Create a dependency and associate it with the SqlCommand.
+                    //SqlDependency dependency = new SqlDependency(command);
+                    SqlDependency dependency = new SqlDependency(command, "service=ServiceName", 0);
+                    // Maintain the reference in a class member.
+
+                    // Subscribe to the SqlDependency event.
+                    dependency.OnChange += new OnChangeEventHandler(OnDependencyChange);
+
+                    // Execute the command.
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        // Process the DataReader.
+                    }
+                }
+           }
+      }
+
+      // Handler method
+      void OnDependencyChange(object sender, SqlNotificationEventArgs e )
+      {
+            //call notify item again 
+            SomeMethod();
+            
+            //if it s an insert notify the calling class 
+            if (e.Info == SqlNotificationInfo.Insert)       onItemReceived(e);
+            else if (e.Info == SqlNotificationInfo.Update)  onItemReceived(e);
+            else if (e.Info == SqlNotificationInfo.Delete)  onItemReceived(e);
+
+            SqlDependency dep = sender as SqlDependency;
+            //unsubscribe 
+            dep.OnChange -= new OnChangeEventHandler(dep_OnChange);
+      }
+
+      private async void onItemReceived(SqlNotificationEventArgs eventArgs)
+      {
+         EventHandler handler = ItemReceived;
+         if (handler != null) handler(this, eventArgs);
+         await _HubContext.Clients.All.SendAsync("notifyMkistat", CollectionMkistat);
+      }
+}
