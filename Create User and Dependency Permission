@@ -3,6 +3,8 @@ GO
 CREATE DATABASE Production;
 GO
 ALTER DATABASE Production SET ENABLE_BROKER;
+GO
+ALTER DATABASE Production SET ENABLE_BROKER with rollback immediate;
 
 GO
 --create user for schema ownership
@@ -52,4 +54,5 @@ GO
 UPDATE dbo.Services SET ServicePrice = 2.5 WHERE ServiceName = 'SomeService1';
 GO
 DELETE FROM dbo.Services WHERE ServiceName = 'SomeService';
-GO
+
+
