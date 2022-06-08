@@ -1,0 +1,41 @@
+
+--SET Option Settings
+--When a SELECT statement is executed under a notification request, the connection that submits the request must have the following options set:
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+SET CONCAT_NULL_YIELDS_NULL ON
+SET QUOTED_IDENTIFIER ON
+SET NUMERIC_ROUNDABORT OFF
+SET ARITHABORT ON
+
+GO
+-- if service is not working properly, you have to check and cleanup conversation
+ DECLARE item_cursor CURSOR LOCAL FAST_FORWARD FOR 
+    SELECT s.conversation_handle FROM dbo.MessageQueue s;
+  --SELECT s.conversation_handle FROM dbo.MessageService s LEFT JOIN sys.conversation_endpoints e ON e.conversation_handle=s.conversation_handle;
+OPEN item_cursor
+DECLARE @conversation UNIQUEIDENTIFIER
+FETCH NEXT FROM item_cursor INTO @conversation
+WHILE @@FETCH_STATUS = 0 
+BEGIN
+    SET @rowCt = @rowCt + 1;                                                    
+    END CONVERSATION @conversation WITH CLEANUP;	                                                
+    FETCH NEXT FROM item_cursor INTO @conversation
+END
+print @rowCt;
+
+GO
+/** Create Queue and Service **/
+drop SERVICE MkiMapTradeService;
+GO
+drop QUEUE MkiMapQueue;
+GO
+CREATE QUEUE MkiMapQueue;
+GO
+CREATE SERVICE MkiMapTradeService ON QUEUE MkiMapQueue ([http://schemas.microsoft.com/SQL/Notifications/PostQueryNotification]);
+
+
+GO
+
+
