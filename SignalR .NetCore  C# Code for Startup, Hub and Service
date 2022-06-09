@@ -4,11 +4,15 @@ public void ConfigureServices(IServiceCollection services)
    ...
    //services.AddSignalR();
    services.AddSignalR(hubOptions => {
-                hubOptions.EnableDetailedErrors = true;
-                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
-            }).AddJsonProtocol(options => {
-                options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            });
+        hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+        hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(15);
+        hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15);
+        hubOptions.EnableDetailedErrors = true;
+        hubOptions.MaximumReceiveMessageSize = 32768;
+        hubOptions.StreamBufferCapacity = 10;
+   }).AddJsonProtocol(options => {
+       options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+   });
 }
 
 public void Configure(IApplicationBuilder app, IHostingEnvironment env)
