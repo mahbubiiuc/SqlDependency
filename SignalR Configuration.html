@@ -1,0 +1,52 @@
+<p>　　　 The configuration properties are described as follows ：</p>
+<table> 
+  <thead> 
+   <tr> 
+    <th> Options </th> 
+    <th> The default value is </th> 
+    <th> explain </th> 
+   </tr> 
+  </thead> 
+  <tbody> 
+   <tr> 
+    <td><code>ClientTimeoutInterval</code></td> 
+    <td>30  second </td> 
+    <td> If the client does not receive the message  ( In this interval, include  keep-alive) , The server will consider the client disconnected .  Because of the way it's implemented , It may take longer for the client to actually mark it as disconnected .  The recommended value is twice the value &nbsp;<code>KeepAliveInterval</code>&nbsp;.</td> 
+   </tr> 
+   <tr> 
+    <td><code>HandshakeTimeout</code></td> 
+    <td>15  second </td> 
+    <td> If the client does not send the initial handshake message within this time interval , The connection will be closed .  This is an advanced setup , The handshake timeout error should only be modified if it occurs due to severe network delay .  More about the handshake process </td> 
+   </tr> 
+   <tr> 
+    <td><code>KeepAliveInterval</code></td> 
+    <td>15  second </td> 
+    <td> If the server does not send a message within this interval , Will be sent automatically  ping  news , Keep the connection open .  When changes &nbsp;<code>KeepAliveInterval</code>&nbsp;, Please change &nbsp;<code>ServerTimeout</code>&nbsp;/&nbsp;<code>serverTimeoutInMilliseconds</code>&nbsp; Settings on the client .  Suggest &nbsp;<code>ServerTimeout</code>&nbsp;/&nbsp;<code>serverTimeoutInMilliseconds</code>&nbsp; The value is twice the value &nbsp;<code>KeepAliveInterval</code>&nbsp;.</td> 
+   </tr> 
+   <tr> 
+    <td><code>SupportedProtocols</code></td> 
+    <td> All installed protocols </td> 
+    <td> Protocols supported by this center .  By default , All protocols that will be allowed to register on the server , But you can remove agreements from this list , To disable specific protocols for each hub .</td> 
+   </tr> 
+   <tr> 
+    <td><code>EnableDetailedErrors</code></td> 
+    <td><code>false</code></td> 
+    <td> If , It's in &nbsp;<code>true</code>&nbsp; When an exception is thrown in the hub method , The detailed exception message will be returned to the client .  The default value is &nbsp;<code>false</code>&nbsp;, Because these exception messages may contain sensitive information .</td> 
+   </tr> 
+   <tr> 
+    <td><code>StreamBufferCapacity</code></td> 
+    <td><code>10</code></td> 
+    <td> The maximum number of items that can be buffered for the client upload stream .  If this limit is reached , Will prevent processing calls , Until the server processes the stream item .</td> 
+   </tr> 
+   <tr> 
+    <td><code>MaximumReceiveMessageSize</code></td> 
+    <td>32 KB</td> 
+    <td> The maximum size of a single incoming hub message .</td> 
+   </tr> 
+   <tr> 
+    <td><code>MaximumParallelInvocationsPerClient</code></td> 
+    <td>1</td> 
+    <td> The maximum number of hub methods that each client can call in parallel before queuing .</td> 
+   </tr> 
+  </tbody> 
+ </table>
