@@ -1,0 +1,22 @@
+-- for Service Broker
+select * from sys.service_broker_endpoints
+select * from sys.conversation_endpoints
+
+-- for all endpoints
+SELECT * FROM sys.endpoints;
+
+-- for endpoints using the HTTP protocol
+select * from sys.http_endpoints
+
+--for soap connections, but note that those these views are deprecated and should not be used for new work.
+select * from sys.soap_endpoints
+select * from sys.endpoint_webmethods
+
+-- for VIA endpoints. Note that the VIA protocol is deprecated and should not be used for new work.
+select * from sys.via_endpoints
+
+-- for you guessed it! – database mirroring (and also for Availability Groups).
+select * from sys.database_mirroring_endpoints
+
+-- for transmission queue data
+select * from sys.transmission_queue
