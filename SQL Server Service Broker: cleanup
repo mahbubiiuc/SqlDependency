@@ -1,0 +1,56 @@
+
+-- End conversations that are in an error state
+declare @handle uniqueidentifier
+declare conv cursor for 
+select conversation_handle from sys.conversation_endpoints where state = 'ER'
+open conv
+
+fetch NEXT FROM conv into @handle
+while @@FETCH_STATUS = 0
+Begin
+
+END Conversation @handle with cleanup
+fetch NEXT FROM conv into @handle
+
+End
+close conv
+deallocate conv
+
+
+
+
+-- End conversations that are half closed
+declare @handle uniqueidentifier
+declare conv cursor for 
+select conversation_handle from sys.conversation_endpoints where state = 'DI'
+open conv
+
+fetch NEXT FROM conv into @handle
+while @@FETCH_STATUS = 0
+Begin
+
+END Conversation @handle with cleanup
+fetch NEXT FROM conv into @handle
+
+End
+close conv
+deallocate conv
+
+
+
+
+-- End all conversations
+declare @handle uniqueidentifier
+declare conv cursor for 
+select conversation_handle from sys.conversation_endpoints
+open conv
+fetch NEXT FROM conv into @handle
+while @@FETCH_STATUS = 0
+Begin
+
+END Conversation @handle with cleanup
+fetch NEXT FROM conv into @handle
+
+End
+close conv
+deallocate conv
