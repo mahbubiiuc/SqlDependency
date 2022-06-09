@@ -1,0 +1,13 @@
+The following table shows log levels available to the JavaScript client. Setting the log level to one of these values enables logging at that level and all levels above it in the table.
+
+
+
+Level	        Description
+
+None	        No messages are logged.
+Critical	    Messages that indicate a failure in the entire app.
+Error	        Messages that indicate a failure in the current operation.
+Warning	      Messages that indicate a non-fatal problem.
+Information	  Informational messages.
+Debug	        Diagnostic messages useful for debugging.
+Trace	        Very detailed diagnostic messages designed for diagnosing specific issues.
